@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract
+import android.provider.OpenableColumns
 import android.util.Log
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,7 +27,6 @@ class MainActivity : AppCompatActivity() {
                 Log.d("DocumentPicker", "No document selected")
                 return@registerForActivityResult
             }
-
             Log.d("DocumentPicker", "Selected URI: $uri")
             uploadDocumentToServer(uri)
         }
@@ -67,14 +67,19 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    /// pdf, doc.
 
     private fun pickDocument() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            type = "application/pdf"
+            type = "*/*"
+            val mimetypes = arrayOf(
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/msword",
+                "application/pdf",
+            )
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes)
 
-            // Optionally, specify a URI for the file that should appear in the
-            // system file picker when it loads.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 putExtra(DocumentsContract.EXTRA_INITIAL_URI, "")
             }
@@ -94,14 +99,28 @@ class MainActivity : AppCompatActivity() {
         Log.d("DocumentPicker", "Selected URI: $documentFiles")
 
         // viewModel.uploadImage(documentFiles)
-
+        binding.tvFilesTitle.text = getFilenameFromPickedDocument(uri)
     }
 
     private fun uploadImageToServer(uri: Uri) {
         val imageFiles = File(uri.path ?: "")
         Log.d("PhotoPicker", "Selected URI: $imageFiles")
 
-        // viewModel.uploadImage(imagePath)
+        // viewModel.uploadImage(imageFiles)
         binding.ivUploadedImage.load(uri)
+        binding.tvFilesTitle.text = getFilenameFromPickedDocument(uri)
+    }
+
+    private fun getFilenameFromPickedDocument(uri: Uri): String {
+        val contentResolver = contentResolver
+        val cursor = contentResolver.query(uri, null, null, null, null) ?: return ""
+
+        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        cursor.moveToFirst()
+
+        val filename = cursor.getString(nameIndex)
+        cursor.close()
+
+        return filename
     }
 }
