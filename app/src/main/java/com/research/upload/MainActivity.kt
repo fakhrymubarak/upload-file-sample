@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
+import android.text.format.Formatter.formatFileSize
 import android.util.Log
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,6 +15,9 @@ import androidx.appcompat.app.AppCompatActivity
 import coil.load
 import com.research.upload.databinding.ActivityMainBinding
 import java.io.File
+import java.math.BigDecimal
+import java.math.RoundingMode
+import kotlin.math.roundToInt
 
 
 class MainActivity : AppCompatActivity() {
@@ -67,12 +71,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    /// pdf, doc.
 
     private fun pickDocument() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            type = "*/*"
+            type = "application/*"
             val mimetypes = arrayOf(
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 "application/msword",
@@ -99,7 +102,8 @@ class MainActivity : AppCompatActivity() {
         Log.d("DocumentPicker", "Selected URI: $documentFiles")
 
         // viewModel.uploadImage(documentFiles)
-        binding.tvFilesTitle.text = getFilenameFromPickedDocument(uri)
+        binding.tvFilesTitle.text = uri.metaDataDocuments.name
+        binding.tvFilesSize.text = formatFileSize(this, uri.metaDataDocuments.size)
     }
 
     private fun uploadImageToServer(uri: Uri) {
@@ -108,19 +112,34 @@ class MainActivity : AppCompatActivity() {
 
         // viewModel.uploadImage(imageFiles)
         binding.ivUploadedImage.load(uri)
-        binding.tvFilesTitle.text = getFilenameFromPickedDocument(uri)
+        binding.tvFilesTitle.text = uri.metaDataDocuments.name
+        binding.tvFilesSize.text = formatFileSize(this, uri.metaDataDocuments.size)
     }
 
-    private fun getFilenameFromPickedDocument(uri: Uri): String {
-        val contentResolver = contentResolver
-        val cursor = contentResolver.query(uri, null, null, null, null) ?: return ""
+    private val Uri.metaDataDocuments: FileMetadata
+        get() {
+            val contentResolver = contentResolver
+            val cursor = contentResolver.query(
+                this, null, null, null, null
+            ) ?: return FileMetadata.empty()
 
-        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        cursor.moveToFirst()
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+            cursor.moveToFirst()
 
-        val filename = cursor.getString(nameIndex)
-        cursor.close()
+            val filename = cursor.getString(nameIndex)
+            val fileSize = cursor.getLong(sizeIndex)
+            cursor.close()
 
-        return filename
+            return FileMetadata(filename, fileSize)
+        }
+}
+
+data class FileMetadata(
+    val name: String,
+    val size: Long,
+) {
+    companion object {
+        fun empty() = FileMetadata("", 0L)
     }
 }
