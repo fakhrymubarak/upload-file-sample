@@ -15,9 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import coil.load
 import com.research.upload.databinding.ActivityMainBinding
 import java.io.File
-import java.math.BigDecimal
-import java.math.RoundingMode
-import kotlin.math.roundToInt
 
 
 class MainActivity : AppCompatActivity() {
@@ -63,6 +60,11 @@ class MainActivity : AppCompatActivity() {
 
             btnUploadImages.setOnClickListener {
                 pickImage()
+            }
+
+            btnChatActivity.setOnClickListener {
+                val intent = Intent(this@MainActivity, ChatActivity::class.java)
+                startActivity(intent)
             }
 
             // remove image when image view clicked

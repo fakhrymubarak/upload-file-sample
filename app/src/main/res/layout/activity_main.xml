@@ -57,4 +57,13 @@
         android:text="Upload Images"
         app:layout_constraintTop_toBottomOf="@id/btn_upload_files" />
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_chat_activity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Chat Activity"
+        app:layout_constraintTop_toBottomOf="@id/btn_upload_images" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
