@@ -1,11 +1,12 @@
 package com.research.upload.model
 
+import android.net.Uri
 import java.io.File
 
 data class Message<out T>(
     val data: T,
-    val sender: User,
-    val createdAt: Long,
+    val sender: User = User("Me"),
+    val createdAt: Long = System.currentTimeMillis(),
 ) {
     companion object {
         fun dummyTextsFrom(sender: String): List<Message<Text>> {
@@ -41,7 +42,7 @@ data class Document(
 
 data class Image(
     val image: File,
-    val path: String,
+    val uri: Uri,
     val size: String,
     val name: String,
 )

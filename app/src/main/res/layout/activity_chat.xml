@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="16dp"
+        android:clipToPadding="false"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constrainedHeight="true"
         app:layout_constraintBottom_toTopOf="@id/layout_chat_chatbox"
@@ -31,7 +32,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/edit_chat_message"
+            android:id="@+id/et_chat"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -41,6 +42,14 @@
             android:inputType="text"
             android:maxLines="6"
             tools:ignore="Autofill" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/btn_upload_images"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:src="@drawable/ic_image"
+            android:textColor="@color/black" />
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/btn_upload_files"

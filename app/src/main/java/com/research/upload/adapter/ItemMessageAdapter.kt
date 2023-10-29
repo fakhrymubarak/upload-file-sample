@@ -5,7 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import coil.load
 import com.research.upload.databinding.ItemChatMeBinding
+import com.research.upload.databinding.ItemChatMeImagesBinding
 import com.research.upload.databinding.ItemChatOthersBinding
 import com.research.upload.model.Document
 import com.research.upload.model.Image
@@ -13,17 +15,18 @@ import com.research.upload.model.Message
 import com.research.upload.model.Text
 
 class ItemMessageAdapter : RecyclerView.Adapter<ItemMessageAdapter.MessageViewHolder>() {
-    private val listData = ArrayList<Message<Any>>()
+    private val listData = ArrayList<Message<*>>()
 
-    var onRemoveImage: ((Message<Any>) -> Unit)? = null
+    var onRemoveImage: ((Message<*>) -> Unit)? = null
 
-    fun addData(message: Message<Any>) {
+    fun addData(message: Message<*>, scrollTo: ((Int) -> Unit)? = {}) {
         val previousContentSize = this.listData.size
         listData.add(message)
         notifyItemRangeInserted(previousContentSize, listData.size)
+        scrollTo?.invoke(previousContentSize)
     }
 
-    fun removeData(message: Message<Any>) {
+    fun removeData(message: Message<*>) {
         val index = listData.indexOf(message)
         this.listData.remove(message)
         notifyItemRangeRemoved(index, 1)
@@ -33,6 +36,10 @@ class ItemMessageAdapter : RecyclerView.Adapter<ItemMessageAdapter.MessageViewHo
         return when (viewType) {
             VIEW_TYPE_MESSAGE_SENT -> SentMessageViewHolder(
                 ItemChatMeBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            )
+
+            VIEW_TYPE_IMAGE_SENT -> SentImagesViewHolder(
+                ItemChatMeImagesBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             )
 
             VIEW_TYPE_MESSAGE_RECEIVED -> ReceivedMessageViewHolder(
@@ -67,32 +74,52 @@ class ItemMessageAdapter : RecyclerView.Adapter<ItemMessageAdapter.MessageViewHo
     }
 
     abstract class MessageViewHolder(binding: ViewBinding) : RecyclerView.ViewHolder(binding.root) {
-        abstract fun bind(data: Message<Any>)
+        abstract fun bind(data: Message<*>)
     }
 
     inner class SentMessageViewHolder(private val binding: ItemChatMeBinding) :
         MessageViewHolder(binding) {
 
-        override fun bind(data: Message<Any>) {
+        override fun bind(data: Message<*>) {
             if (data.data !is Text) return
 
-            binding.textGchatDateMe.visibility = View.GONE
-            binding.textGchatMessageMe.text = data.data.text
-            binding.textGchatTimestampMe.text = data.createdAt.toString()
+            with(binding) {
+                textGchatDateMe.visibility = View.GONE
+                textGchatMessageMe.text = data.data.text
+                textGchatTimestampMe.text = data.createdAt.toString()
+            }
+        }
+    }
+
+    inner class SentImagesViewHolder(private val binding: ItemChatMeImagesBinding) :
+        MessageViewHolder(binding) {
+
+        override fun bind(data: Message<*>) {
+            if (data.data !is Image) return
+
+            with(binding) {
+                textGchatDateMe.visibility = View.GONE
+                ivUploadedImage.load(data.data.uri)
+                textGchatTimestampMe.text = data.createdAt.toString()
+                btnDeleteImage.setOnClickListener {
+                    onRemoveImage?.invoke(data)
+                }
+            }
         }
     }
 
     inner class ReceivedMessageViewHolder(private val binding: ItemChatOthersBinding) :
         MessageViewHolder(binding) {
 
-        override fun bind(data: Message<Any>) {
+        override fun bind(data: Message<*>) {
             if (data.data !is Text) return
 
-            binding.textGchatDateOther.visibility = View.GONE
-            binding.textGchatUserOther.text = data.sender.nickname
-            binding.textGchatMessageOther.text = data.data.text
-            binding.textGchatTimestampOther.text = data.createdAt.toString()
-
+            with(binding) {
+                textGchatDateOther.visibility = View.GONE
+                textGchatUserOther.text = data.sender.nickname
+                textGchatMessageOther.text = data.data.text
+                textGchatTimestampOther.text = data.createdAt.toString()
+            }
         }
     }
 
