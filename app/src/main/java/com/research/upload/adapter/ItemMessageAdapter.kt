@@ -14,6 +14,7 @@ import com.research.upload.model.Document
 import com.research.upload.model.Image
 import com.research.upload.model.Message
 import com.research.upload.model.Text
+import com.research.upload.toHHmm
 
 class ItemMessageAdapter : RecyclerView.Adapter<ItemMessageAdapter.MessageViewHolder>() {
     private val listData = ArrayList<Message<*>>()
@@ -91,7 +92,7 @@ class ItemMessageAdapter : RecyclerView.Adapter<ItemMessageAdapter.MessageViewHo
             with(binding) {
                 textGchatDateMe.visibility = View.GONE
                 textGchatMessageMe.text = data.data.text
-                textGchatTimestampMe.text = data.createdAt.toString()
+                textGchatTimestampMe.text = data.createdAt.toHHmm()
                 cardGchatMessageMe.setOnLongClickListener {
                     onRemoveMessage?.invoke(data)
                     true
@@ -109,7 +110,7 @@ class ItemMessageAdapter : RecyclerView.Adapter<ItemMessageAdapter.MessageViewHo
             with(binding) {
                 textGchatDateMe.visibility = View.GONE
                 ivUploadedImage.load(data.data.uri)
-                textGchatTimestampMe.text = data.createdAt.toString()
+                textGchatTimestampMe.text = data.createdAt.toHHmm()
                 btnDeleteImage.setOnClickListener {
                     onRemoveMessage?.invoke(data)
                 }
@@ -127,7 +128,7 @@ class ItemMessageAdapter : RecyclerView.Adapter<ItemMessageAdapter.MessageViewHo
                 textGchatDateMe.visibility = View.GONE
                 tvFileName.text = data.data.name
                 tvFileSize.text = data.data.size
-                textGchatTimestampMe.text = data.createdAt.toString()
+                textGchatTimestampMe.text = data.createdAt.toHHmm()
                 btnDeleteImage.setOnClickListener {
                     onRemoveMessage?.invoke(data)
                 }
@@ -145,7 +146,7 @@ class ItemMessageAdapter : RecyclerView.Adapter<ItemMessageAdapter.MessageViewHo
                 textGchatDateOther.visibility = View.GONE
                 textGchatUserOther.text = data.sender.nickname
                 textGchatMessageOther.text = data.data.text
-                textGchatTimestampOther.text = data.createdAt.toString()
+                textGchatTimestampOther.text = data.createdAt.toHHmm()
             }
         }
     }

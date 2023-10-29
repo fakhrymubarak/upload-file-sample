@@ -20,7 +20,6 @@ import com.research.upload.model.Image
 import com.research.upload.model.Message
 import com.research.upload.model.Text
 
-
 class ChatActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityChatBinding
@@ -77,7 +76,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun pickDocument() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "application/*"
             val mimetypes = arrayOf(

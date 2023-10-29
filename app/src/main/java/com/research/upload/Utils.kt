@@ -1,6 +1,5 @@
 package com.research.upload
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
@@ -11,6 +10,7 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 
@@ -37,7 +37,6 @@ fun Uri.bitmapToFile(context: Context): File {
     return tempFile
 }
 
-@SuppressLint("Recycle")
 fun Uri.documentToFile(context: Context): File? {
     val filename = this.fileName(context)
     val newFile = File(context.cacheDir, filename)
@@ -89,3 +88,10 @@ fun Uri.fileName(context: Context): String {
 
     return filename
 }
+
+fun Long.toHHmm(): String {
+    val date = Date(this)
+    val simpleDateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    return simpleDateFormat.format(date)
+}
+
