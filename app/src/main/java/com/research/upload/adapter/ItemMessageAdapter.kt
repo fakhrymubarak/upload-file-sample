@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import coil.load
 import com.research.upload.databinding.ItemChatMeBinding
+import com.research.upload.databinding.ItemChatMeDocBinding
 import com.research.upload.databinding.ItemChatMeImagesBinding
 import com.research.upload.databinding.ItemChatOthersBinding
 import com.research.upload.model.Document
@@ -17,7 +18,7 @@ import com.research.upload.model.Text
 class ItemMessageAdapter : RecyclerView.Adapter<ItemMessageAdapter.MessageViewHolder>() {
     private val listData = ArrayList<Message<*>>()
 
-    var onRemoveImage: ((Message<*>) -> Unit)? = null
+    var onRemoveMessage: ((Message<*>) -> Unit)? = null
 
     fun addData(message: Message<*>, scrollTo: ((Int) -> Unit)? = {}) {
         val previousContentSize = this.listData.size
@@ -40,6 +41,10 @@ class ItemMessageAdapter : RecyclerView.Adapter<ItemMessageAdapter.MessageViewHo
 
             VIEW_TYPE_IMAGE_SENT -> SentImagesViewHolder(
                 ItemChatMeImagesBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            )
+
+            VIEW_TYPE_DOCUMENT_SENT -> SentDocsViewHolder(
+                ItemChatMeDocBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             )
 
             VIEW_TYPE_MESSAGE_RECEIVED -> ReceivedMessageViewHolder(
@@ -87,6 +92,10 @@ class ItemMessageAdapter : RecyclerView.Adapter<ItemMessageAdapter.MessageViewHo
                 textGchatDateMe.visibility = View.GONE
                 textGchatMessageMe.text = data.data.text
                 textGchatTimestampMe.text = data.createdAt.toString()
+                cardGchatMessageMe.setOnLongClickListener {
+                    onRemoveMessage?.invoke(data)
+                    true
+                }
             }
         }
     }
@@ -102,7 +111,25 @@ class ItemMessageAdapter : RecyclerView.Adapter<ItemMessageAdapter.MessageViewHo
                 ivUploadedImage.load(data.data.uri)
                 textGchatTimestampMe.text = data.createdAt.toString()
                 btnDeleteImage.setOnClickListener {
-                    onRemoveImage?.invoke(data)
+                    onRemoveMessage?.invoke(data)
+                }
+            }
+        }
+    }
+
+    inner class SentDocsViewHolder(private val binding: ItemChatMeDocBinding) :
+        MessageViewHolder(binding) {
+
+        override fun bind(data: Message<*>) {
+            if (data.data !is Document) return
+
+            with(binding) {
+                textGchatDateMe.visibility = View.GONE
+                tvFileName.text = data.data.name
+                tvFileSize.text = data.data.size
+                textGchatTimestampMe.text = data.createdAt.toString()
+                btnDeleteImage.setOnClickListener {
+                    onRemoveMessage?.invoke(data)
                 }
             }
         }

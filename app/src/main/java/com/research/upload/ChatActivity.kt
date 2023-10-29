@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.provider.DocumentsContract
 import android.text.format.Formatter
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +15,7 @@ import androidx.core.net.toUri
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.research.upload.adapter.ItemMessageAdapter
 import com.research.upload.databinding.ActivityChatBinding
+import com.research.upload.model.Document
 import com.research.upload.model.Image
 import com.research.upload.model.Message
 import com.research.upload.model.Text
@@ -63,7 +65,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun initEvent() {
-        adapter.onRemoveImage = { showAlertDelete(it) }
+        adapter.onRemoveMessage = { showAlertDelete(it) }
 
         with(binding) {
             btnUploadImages.setOnClickListener {
@@ -105,11 +107,14 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun uploadDocument(uri: Uri) {
-        val file = uri.documentToFile()
-        val sizeStr = Formatter.formatFileSize(this, file.length())
+        val file = uri.documentToFile(this)
+        if (file == null) {
+            Toast.makeText(this, "File Not Found!", Toast.LENGTH_LONG).show()
+            return
+        }
 
-        val document = Image(file, uri, sizeStr, file.name)
-        Log.e("ChatActivity", "uploadImages: $document")
+        val sizeStr = Formatter.formatFileSize(this, file.length())
+        val document = Document(file, file.path, sizeStr, file.name)
 
         val messageDocument = Message(document)
 

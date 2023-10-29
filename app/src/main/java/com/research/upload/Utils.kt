@@ -1,13 +1,18 @@
 package com.research.upload
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import java.io.BufferedInputStream
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
+
 
 fun createImageTempFile(context: Context): File {
     val timeStamp: String = SimpleDateFormat(
@@ -32,9 +37,43 @@ fun Uri.bitmapToFile(context: Context): File {
     return tempFile
 }
 
-fun Uri.documentToFile(): File {
-    return File(this.path ?: "")
+@SuppressLint("Recycle")
+fun Uri.documentToFile(context: Context): File? {
+    val filename = this.fileName(context)
+    val newFile = File(context.cacheDir, filename)
+
+    return try {
+        val inputStream = context.contentResolver.openInputStream(this)
+        val outputStream = FileOutputStream(newFile)
+        copyAndCloseInputStream(inputStream, outputStream)
+        newFile
+    } catch (e: FileNotFoundException) {
+        e.printStackTrace()
+        null
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }
+
+fun copyAndCloseInputStream(inputStream: InputStream?, outputStream: OutputStream): Int {
+    var bufferedInputStream: BufferedInputStream? = null
+    var totalBytes = 0
+    try {
+        bufferedInputStream = BufferedInputStream(inputStream)
+        val buffer = ByteArray(1024)
+        var bytesRead: Int
+        while (bufferedInputStream.read(buffer).also { bytesRead = it } != -1) {
+            outputStream.write(buffer, 0, bytesRead)
+            totalBytes += bytesRead
+        }
+    } finally {
+        bufferedInputStream?.close()
+        inputStream?.close()
+    }
+    return totalBytes
+}
+
 
 fun Uri.fileName(context: Context): String {
     val contentResolver = context.contentResolver
