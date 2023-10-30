@@ -69,6 +69,7 @@ fun copyAndCloseInputStream(inputStream: InputStream?, outputStream: OutputStrea
     } finally {
         bufferedInputStream?.close()
         inputStream?.close()
+        outputStream.close()
     }
     return totalBytes
 }
